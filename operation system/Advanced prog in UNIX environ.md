@@ -386,11 +386,17 @@ Note:
 
     
 
+# 7存储空间布局
 
+![截屏2020-11-08 下午12.15.33](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-08 下午12.15.33.png)
 
+* 正文段：由CPU执行的机器指令部分
+* 初始化数据段：包含了程序中需明确地赋值的变量 eg: int maxcount=90;
+* 未初始化的数据： eg: long sum[1000];
+* 栈：自动变量以及每次函数调用时所需保存的信息
+* 堆：在堆中进行动态存储分配
 
-
-# Process Control
+# 8 Process Control
 
 Every process has a unique process ID, a non-negative integer
 
@@ -562,4 +568,251 @@ There are seven exec functions
 ![截屏2020-10-29 下午4.10.44](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-10-29 下午4.10.44.png)
 
 fork函数是用于创建一个子进程，该子进程几乎是父进程的副本，而有时我们希望子进程去执行另外的程序，exec函数族就提供了一个在进程中启动另一个程序执行的方法。它可以根据指定的文件名或目录名找到可执行文件，并用它来取代原调用进程的数据段、代码段和堆栈段，在执行完之后，原调用进程的内容除了进程号外，其他全部被新程序的内容替换了。另外，这里的可执行文件既可以是二进制文件，也可以是Linux下任何可执行脚本文件。
+
+
+
+# 9 进程关系
+
+## 9.4 进程组
+
+每个进程除了有一个进程ID之外，还属于一个进程组。
+
+进程组是一个或多个进程的集合，同一进程组中的各进程接收来自同一终端的各种信号，
+
+```
+#include <unistd.h>
+pid_t getpgrp(void);
+```
+
+每个进程组有一个组长进程，组长进程的进程组ID等于其进程ID
+
+加入一个现有的进程组
+
+```
+#include <unistd.h>
+int setpgid(pid_t pid, pid_t pgid);
+```
+
+setpgid将pid进程的进程组ID设置为pgid，
+
+## 9.5 会话
+
+会话（session)是一个或多个进程组的集合。
+
+进程调用setsid函数建立一个新会话
+
+```
+#include <unistd.h>
+
+pid_t setsid(void)
+       成功返回进程组id，error->-1
+```
+
+
+
+# 10 信号
+
+## 10.8 可靠信号术语
+
+造成信号的事件发生时，进程**产生**一个信号。
+
+当对信号采取了动作时，向进程**递送**了一个信号。
+
+在信号产生和递送之间的时间间隔内，信号是未决的(pending)。
+
+每个进程都有一个信号屏蔽字（signal mask），它规定了当前要阻塞递送到该进程的信号集。
+
+## 10.9 kill and raise
+
+kill函数将信号发送给进程或进程组，raise函数则允许进程向自身发送信号。
+
+```
+#include <signal.h>
+
+int kill (pid_t pid, int signo);
+
+int raise(int signo);
+                        成功返回0，失败返回-1
+```
+
+Raise(signo)=kill(getpid(),signo)
+
+Kill(pid_t pid, int signo)
+
+* pid>0: 发送个pid这个进程
+
+* pid=0: 发送给与发送进程属于同一进程组的所有进程
+
+* pid<0: 发送给|pid|这个进程组的进程
+
+* pid=-1: 发送给有权限的所有进程
+
+## 10.10 alarm和pause
+
+alarm函数可以设置一个定时器，定时器超时时，产生SIGALRM信号，如果忽略或不捕捉此信号，将终止该进程
+
+```
+# include <unistd.h>
+unsigned int alarm(unsigned int seconds)
+               返回值：0或以前设置的闹钟时间的余留秒数
+```
+
+pause函数使调用进程挂起直至捕捉到一个信号
+
+```
+# include<unistd.h>
+int pause(void);
+```
+
+只有执行了一个信号处理程序并从其返回时，pause才返回，这种情况下，pause返回-1，errno设置为EINTR
+
+
+
+
+
+# 14 高级IO
+
+## 14.8 存储映射I/O
+
+Memory-mapped I/O将一个磁盘文件映射到存储空间中的一个缓冲区上，于是，从缓冲区中取数据时，就相当于读文件中的相应字节。
+
+首先，告诉内核将一个给定的文件映射到一个存储区域中。
+
+![截屏2020-11-02 下午8.37.23](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-02 下午8.37.23.png)
+
+addr:映射存储区的起始地址
+
+fd:被映射文件的描述符
+
+prot:映射存储区的保护要求
+
+![截屏2020-11-02 下午8.38.54](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-02 下午8.38.54.png)
+
+![截屏2020-11-02 下午8.40.55](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-02 下午8.40.55.png)
+
+flag参数：
+
+MAP_FIXED: 返回值等于addr
+
+MAP_SHARED:指定存储操作修改映射文件，存储操作相当于对文件的write
+
+MPA_PRIVATE:表示对映射区的存储操作导致创建该映射文件的一个私有副本。
+
+
+
+off和addr通常被要求是系统虚拟存储页长度的倍数
+
+
+
+
+
+与映射区相关的信号有 SIGSEGV 和 SIGBUS
+
+SIGSEGV: 用于指示进程试图访问对它不可用的存储区
+
+SIGBUS：映射区的某个部分在访问时已不存在。
+
+
+
+子进程能通过fork继承存储映射区，新程序不能通过exec继承存储映射区
+
+# 15 interprocess communication
+
+## pipes
+
+limitation
+
+1. Historically, they have been half duplex (i.e., data ﬂows in only one direction). Some systems now provide full-duplex pipes, but for maximum portability, we should never assume that this is the case.
+2. Pipes can be used only between processes that have a common ancestor. Normally, a pipe is created by a process, that process calls fork, and the pipe is used between the parent and the child.
+
+A pipe is created by calling the pipe function.
+
+```
+#include <unistd.h> 
+
+int pipe(int fd[2]);
+
+																	Returns: 0 if OK, −1 on error
+```
+
+Two ﬁle descriptors are returned through the fd argument: fd[0] is open for reading, and fd[1] is open for writing.
+
+Two ways to picture a half-duplex pipe are shown in Figure 15.2. The left half of the ﬁgure shows the two ends of the pipe connected in a single process. The right half of the ﬁgure emphasizes that the data in the pipe ﬂows through the kernel.
+
+single process
+
+![截屏2020-11-02 下午3.55.14](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-02 下午3.55.14.png)
+
+after fork()
+
+![截屏2020-11-02 下午3.56.57](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-02 下午3.56.57.png)
+
+
+
+
+
+then what happens depends on which direction of data flow we want
+
+
+
+![截屏2020-11-02 下午4.04.58](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-02 下午4.04.58.png)
+
+1. If we read from a pipe whose write end has been closed, read returns 0 to indicate an end of ﬁle after all the data has been read.
+2. If we write to a pipe whose read end has been closed, the signal SIGPIPE is generated. If we either ignore the signal or catch it and return from the signal handler, write returns −1 with errno set to EPIPE.
+
+
+
+## 15.10 POSIX信号量
+
+POSIX信号量机制是3种IPC机制之一（消息队列，信号量，共享存储）
+
+信号量有两种形式：命名的和未命名的
+
+![截屏2020-11-02 下午10.38.57](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-02 下午10.38.57.png)
+
+
+
+![截屏2020-11-02 下午10.42.23](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-02 下午10.42.23.png)
+
+
+
+# 16 Network IPC: Sockets
+
+## socket descriptors
+
+A socket is an abstraction of a communication endpoint. Just as they would use ﬁle descriptors to access ﬁles, applications use socket descriptors to access sockets.
+
+```
+#include <sys/socket.h> 
+int socket(int domain, int type, int protocol); 
+                Returns: ﬁle (socket) descriptor if OK, −1 on error
+```
+
+
+
+The default protocol for a **SOCK_STREAM** socket in the AF_INET communication domain is **TCP** (Transmission Control Protocol). The default protocol for a **SOCK_DGRAM** socket in the AF_INET communication domain is **UDP** (User Datagram Protocol).
+
+With a datagram (SOCK_DGRAM) interface, no logical connection needs to exist between peers for them to communicate.
+
+A byte stream (SOCK_STREAM), in contrast, requires that, before you can exchange data, you set up a logical connection
+
+A **SOCK_STREAM** socket provides a byte-stream service; applications are unaware of message boundaries.
+
+
+
+Communication on a socket is bidirectional. We can disable I/O on a socket with the shutdown function.
+
+```
+#include <sys/socket.h> 
+int shutdown(int sockfd, int how);
+											Returns: 0 if OK, −1 on error
+```
+
+how is SHUT_RD, then reading from the socket is disabled.
+
+how is SHUT_WR, then we can’t use the socket for transmitting data
+
+SHUT_RDWR to disable both data transmission and reception.
+
+![截屏2020-11-02 下午4.28.55](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-02 下午4.28.55.png)
 
