@@ -125,11 +125,11 @@ Questions:
 
 - What happens if the parent process terminates before its children?
 
-  the child process will be a child process of init process![截屏2020-10-22 下午5.16.13](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-10-22 下午5.16.13.png)
+  the child process will be a child process of init process![截屏2020-10-22 下午5.16.13](images/%E6%88%AA%E5%B1%8F2020-10-22%20%E4%B8%8B%E5%8D%885.16.13.png)
 
 - What happens if a child process has terminated, but the parent never calls `waitpid()`?
 
-  ![截屏2020-10-22 下午5.18.29](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-10-22 下午5.18.29.png)
+  ![截屏2020-10-22 下午5.18.29](images/%E6%88%AA%E5%B1%8F2020-10-22%20%E4%B8%8B%E5%8D%885.18.29.png)
 
   os Wait to clean the process until the parent calls the `waitpid`,
 
@@ -388,7 +388,7 @@ Note:
 
 # 7存储空间布局
 
-![截屏2020-11-08 下午12.15.33](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-08 下午12.15.33.png)
+![截屏2020-11-08 下午12.15.33](images/%E6%88%AA%E5%B1%8F2020-11-08%20%E4%B8%8B%E5%8D%8812.15.33.png)
 
 * 正文段：由CPU执行的机器指令部分
 * 初始化数据段：包含了程序中需明确地赋值的变量 eg: int maxcount=90;
@@ -420,19 +420,19 @@ The child is a copy of the parent. For example, the child gets a copy of the par
 
 1. Kernel data structures for open files
 
-   ![Figure 3.7, APUE](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/fig3.7.jpg)Figure 3.7, APUE
+   ![Figure 3.7, APUE](images/fig3.7.jpg)Figure 3.7, APUE
 
 2. Two independent processes with the same file open
 
-   ![Figure 3.8, APUE](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/fig3.8.jpg)Figure 3.8, APUE
+   ![Figure 3.8, APUE](images/fig3.8.jpg)Figure 3.8, APUE
 
 3. Kernel data structures after `dup(1)`
 
-   ![Figure 3.9, APUE](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/fig3.9.jpg)Figure 3.9, APUE
+   ![Figure 3.9, APUE](images/fig3.9.jpg)Figure 3.9, APUE
 
 4. Sharing of open files between parent and child after `fork`
 
-   ![Figure 8.2, APUE](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/fig8.2.jpg)Figure 8.2, APUE
+   ![Figure 8.2, APUE](images/fig8.2.jpg)Figure 8.2, APUE
 
 open and fork: AABBCCDD
 
@@ -533,7 +533,7 @@ int waitid(idtype_t idtype, id_t id, siginfo_t *infop, int options);
                                     Returns: 0 if OK, −1 on error
 ```
 
-![截屏2020-10-29 下午3.45.43](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-10-29 下午3.45.43.png)
+![截屏2020-10-29 下午3.45.43](images/%E6%88%AA%E5%B1%8F2020-10-29%20%E4%B8%8B%E5%8D%883.45.43.png)
 
 The infop argument is a pointer to a siginfo structure. This structure contains detailed information about the signal generated that caused the state change in the child process.
 
@@ -565,7 +565,7 @@ When a process calls one of the exec functions, that process is completely repla
 
 There are seven exec functions
 
-![截屏2020-10-29 下午4.10.44](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-10-29 下午4.10.44.png)
+![截屏2020-10-29 下午4.10.44](images/%E6%88%AA%E5%B1%8F2020-10-29%20%E4%B8%8B%E5%8D%884.10.44.png)
 
 fork函数是用于创建一个子进程，该子进程几乎是父进程的副本，而有时我们希望子进程去执行另外的程序，exec函数族就提供了一个在进程中启动另一个程序执行的方法。它可以根据指定的文件名或目录名找到可执行文件，并用它来取代原调用进程的数据段、代码段和堆栈段，在执行完之后，原调用进程的内容除了进程号外，其他全部被新程序的内容替换了。另外，这里的可执行文件既可以是二进制文件，也可以是Linux下任何可执行脚本文件。
 
@@ -678,7 +678,7 @@ Memory-mapped I/O将一个磁盘文件映射到存储空间中的一个缓冲区
 
 首先，告诉内核将一个给定的文件映射到一个存储区域中。
 
-![截屏2020-11-02 下午8.37.23](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-02 下午8.37.23.png)
+![截屏2020-11-02 下午8.37.23](images/%E6%88%AA%E5%B1%8F2020-11-02%20%E4%B8%8B%E5%8D%888.37.23.png)
 
 addr:映射存储区的起始地址
 
@@ -686,9 +686,9 @@ fd:被映射文件的描述符
 
 prot:映射存储区的保护要求
 
-![截屏2020-11-02 下午8.38.54](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-02 下午8.38.54.png)
+![截屏2020-11-02 下午8.38.54](images/%E6%88%AA%E5%B1%8F2020-11-02%20%E4%B8%8B%E5%8D%888.38.54.png)
 
-![截屏2020-11-02 下午8.40.55](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-02 下午8.40.55.png)
+![截屏2020-11-02 下午8.40.55](images/%E6%88%AA%E5%B1%8F2020-11-02%20%E4%B8%8B%E5%8D%888.40.55.png)
 
 flag参数：
 
@@ -741,11 +741,11 @@ Two ways to picture a half-duplex pipe are shown in Figure 15.2. The left half o
 
 single process
 
-![截屏2020-11-02 下午3.55.14](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-02 下午3.55.14.png)
+![截屏2020-11-02 下午3.55.14](images/%E6%88%AA%E5%B1%8F2020-11-02%20%E4%B8%8B%E5%8D%883.55.14.png)
 
 after fork()
 
-![截屏2020-11-02 下午3.56.57](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-02 下午3.56.57.png)
+![截屏2020-11-02 下午3.56.57](images/%E6%88%AA%E5%B1%8F2020-11-02%20%E4%B8%8B%E5%8D%883.56.57.png)
 
 
 
@@ -753,9 +753,7 @@ after fork()
 
 then what happens depends on which direction of data flow we want
 
-
-
-![截屏2020-11-02 下午4.04.58](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-02 下午4.04.58.png)
+![截屏2020-11-02 下午4.04.58](images/%E6%88%AA%E5%B1%8F2020-11-02%20%E4%B8%8B%E5%8D%884.04.58.png)
 
 1. If we read from a pipe whose write end has been closed, read returns 0 to indicate an end of ﬁle after all the data has been read.
 2. If we write to a pipe whose read end has been closed, the signal SIGPIPE is generated. If we either ignore the signal or catch it and return from the signal handler, write returns −1 with errno set to EPIPE.
@@ -768,11 +766,9 @@ POSIX信号量机制是3种IPC机制之一（消息队列，信号量，共享�
 
 信号量有两种形式：命名的和未命名的
 
-![截屏2020-11-02 下午10.38.57](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-02 下午10.38.57.png)
+![截屏2020-11-02 下午10.38.57](images/%E6%88%AA%E5%B1%8F2020-11-02%20%E4%B8%8B%E5%8D%8810.38.57.png)
 
-
-
-![截屏2020-11-02 下午10.42.23](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-02 下午10.42.23.png)
+![截屏2020-11-02 下午10.42.23](images/%E6%88%AA%E5%B1%8F2020-11-02%20%E4%B8%8B%E5%8D%8810.42.23.png)
 
 
 
@@ -814,13 +810,4 @@ how is SHUT_WR, then we can’t use the socket for transmitting data
 
 SHUT_RDWR to disable both data transmission and reception.
 
-![截屏2020-11-02 下午4.28.55](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-02 下午4.28.55.png)
-
-![截屏2020-11-09 下午3.32.32](/Users/chenxu/Documents/GitHub/learning-OS/operation%20system/images/%E6%88%AA%E5%B1%8F2020-11-09%20%E4%B8%8B%E5%8D%883.32.32.png)
-
-![截屏2020-11-09 下午3.35.23](/Users/chenxu/Documents/GitHub/learning-OS/operation system/Advanced prog in UNIX environ.assets/截屏2020-11-09 下午3.35.23.png)
-
-![截屏2020-11-09 下午3.37.38](images/截屏2020-11-09 下午3.37.38.png)
-
-![截屏2020-11-09 下午3.38.53](images/%E6%88%AA%E5%B1%8F2020-11-09%20%E4%B8%8B%E5%8D%883.38.53.png)
-
+![截屏2020-11-02 下午4.28.55](images/%E6%88%AA%E5%B1%8F2020-11-02%20%E4%B8%8B%E5%8D%884.28.55.png)
