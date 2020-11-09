@@ -820,3 +820,5 @@ SHUT_RDWR to disable both data transmission and reception.
 
 ![截屏2020-11-09 下午3.35.23](/Users/chenxu/Documents/GitHub/learning-OS/operation system/Advanced prog in UNIX environ.assets/截屏2020-11-09 下午3.35.23.png)
 
+![截屏2020-11-09 下午3.37.38](images/截屏2020-11-09 下午3.37.38.png)
+
