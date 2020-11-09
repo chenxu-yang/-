@@ -816,3 +816,5 @@ SHUT_RDWR to disable both data transmission and reception.
 
 ![截屏2020-11-02 下午4.28.55](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-11-02 下午4.28.55.png)
 
+![截屏2020-11-09 下午3.32.32](/Users/chenxu/Documents/GitHub/learning-OS/operation%20system/images/%E6%88%AA%E5%B1%8F2020-11-09%20%E4%B8%8B%E5%8D%883.32.32.png)
+
