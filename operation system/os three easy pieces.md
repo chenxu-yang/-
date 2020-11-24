@@ -117,6 +117,62 @@ a[m][n]
 
 
 
+# 4 the abstraction: the process
+
+The definition of a process, informally, is quite simple: it is a running program
+
+## 4.1 进程
+
+操作系统为正在运行的程序提供的抽象就是进程。
+
+进程机器状态的组成部分
+
+1. 内存，指令、进程读取和写入的数据存在于内存中。该进程可以访问的内存是该进程的一部分
+2. 寄存器，
+
+## 4.2 进程API
+
+* 创建（create）：操作系统必须包含一些创建新进程的方法。在shell中键入命令或双击应用程序图标时，会调用操作系统来创建新进程，运行指定的程序。
+* 销毁（destroy）：由于存在创建进程的接口，因此系统还提供了一个强制销毁进程的接口。当然，很多进程会在运行完成后自行退出。但是，如果它们不退出，用户可能希望终止它们，因此停止失控进程的接口非常有用。
+* 等待（wait）：有时等待进程停止运行是有用的，因此经常提供某种等待接口。
+* 其他控制（miscellaneous control）：除了杀死或等待进程外，有时还可能有其他控制。例如，大多数操作系统提供某种方法来暂停进程（停止运行一段时间），然后恢复（继续运行）。
+* 状态（statu）：通常也有一些接口可以获得有关进程的状态信息，例如运行了多长时间，或者处于什么状态
+
+## 4.3 进程创建
+
+操作系统运行程序
+
+1.  先将代码和所有静态数据load到内存中，加载到进程的地址空间中，![截屏2020-11-24 下午4.32.44](images/%E6%88%AA%E5%B1%8F2020-11-24%20%E4%B8%8B%E5%8D%884.32.44.png)
+
+   惰性加载：仅在程序执行期间加载需要的代码和数据片段-->分页和交换
+
+2. 为程序的stack分配内存，存放局部变量，函数参数和返回地址。
+
+   也可能给heap分配一些内存，用于显式请求的动态分配数据。malloc()请求，free()释放。数据结构需要堆
+
+3. 初试I/O，UNIX里，每个进程都有3个打开的文件描述符，用于标准输入、输出和错误。
+
+4. 启动程序，在main处运行，OS将cpu的控制权转移到新创建的进程中。
+
+
+
+## 4.4 进程状态
+
+* 运行running：正在执行指令
+* 就绪ready：已准备好运行，但并未运行
+* 阻塞blocked：执行了某种操作，直到发生其他事件时才会准备运行。如发起I/O请求
+
+![截屏2020-11-24 下午4.42.33](images/%E6%88%AA%E5%B1%8F2020-11-24%20%E4%B8%8B%E5%8D%884.42.33.png)
+
+* 初试状态init
+* 最终状态final:也称为僵尸状态，它允许其他进程（通常是父进程）检查进程的返回代码。完成后，父进程将进行最后一次调用（例如，wait()），以等待子进程的完成，并告诉操作系统它可以清理这个正在结束的进程的所有相关数据结构。
+
+## 4.5 数据结构
+
+操作系统有一些关键数据结构来跟踪各种相关信息。对于停止的进程，寄存器上下文将保存其寄存器的内容。当一个进程停止时，它的寄存器将被保存到这个内存位置。通过恢复这些寄存器（将它们的值放回实际的物理寄存器中），操作系统可以恢复运行该进程。
+
+操作系统可能会为所有就绪的进程保留某种进程列表（process list）
+
 # 6. CPU mechanisms
 
 By time sharing the CPU in this manner, virtualization is achieved.
@@ -126,11 +182,11 @@ challenges
 * Performance: how can we implement virtualization without adding excessive overhead to the system?
 * Control:how can we run processes efficiently while retaining control over the CPU?
 
-##  Limited Direct Execution
+##  6.1 受限直接执行
 
 The “direct execution” part of the idea is simple: just run the program directly on the CPU.![截屏2020-10-16 下午5.33.36](/Users/chenxu/Documents/GitHub/learning-OS/operation system/images/截屏2020-10-16 下午5.33.36.png)
 
-## User/kernal mode
+## 6.2 受限制的操作 user/kernel
 
 * running on the CPU introduces a problem: what if the process wishes to perform some kind of **restricted operation**, such as issuing an I/O request to a disk, or gaining access to more system resources such as CPU or memory?
 
@@ -146,7 +202,7 @@ The “direct execution” part of the idea is simple: just run the program dire
 
 
 
-## os regain control of CPU
+## 6.3 进程切换，重获cpu控制权
 
 How can the operating system **regain control** of the CPU so that it can switch between processes?
 
@@ -163,8 +219,6 @@ How can the operating system **regain control** of the CPU so that it can switch
 * Non-cooperative approach
 
   **a timer interrupt**:when the interrupt is raised, the currently running process is halted, and a pre-configured **interrupt handler** in the OS runs.
-
-## saving and restoring context
 
 whether to continue running the currently-running process, or switch to a different one. This decision is made by a part of the operating system known as the **scheduler**
 

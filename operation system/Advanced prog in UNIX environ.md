@@ -666,11 +666,182 @@ int pause(void);
 
 只有执行了一个信号处理程序并从其返回时，pause才返回，这种情况下，pause返回-1，errno设置为EINTR
 
+## 10.12 sigprocmask
 
+sigprocmask可以检测或更改信号屏蔽字
+
+```
+# include <signal.h>
+int sigprocmask(int how, const sigset_t *restrict set,sigset_t *restrict oset);
+成功返回0 出错-1
+```
+
+how:
+
+* SIG_BLOCK:  set包含了希望阻塞的附加信号
+* SIG_UNBLOCK: set包含了希望解除阻塞的信号
+* SIG_SETMASK: 该进程新的信号屏蔽是set指向的值
+
+## 10.13 sigpending
+
+```
+#include<signal.h>
+int sigpending(sigset_T *set);
+
+```
+
+返回阻塞的信号集，通过set返回
+
+## 10.14 sigaction
+
+sigaction的功能是检查或修改与指定信号相关联的处理动作。
+
+```
+#include<signal.h>
+int sigaction(int signo, const struct sigaction *restrict act, struct sigaction *restrict oact);
+```
+
+
+
+# 11 线程
+
+线程标识：pthread_t
+
+Pthread_t pthread_self(void)
+
+![截屏2020-11-11 上午11.18.56](images/%E6%88%AA%E5%B1%8F2020-11-11%20%E4%B8%8A%E5%8D%8811.18.56.png)
+
+![截屏2020-11-11 下午12.03.27](images/%E6%88%AA%E5%B1%8F2020-11-11%20%E4%B8%8B%E5%8D%8812.03.27.png)
+
+如果进程中的任意线程调用了exit,_____exit，或者_Exit,整个进程就会终止
+
+单个线程退出
+
+1. 从启动例程返回，返回值是线程的退出码
+
+2. 线程可以被同一进程中的其他线程取消
+
+3. 线程调用pthread_exit
+
+   ![截屏2020-11-11 下午12.08.00](images/%E6%88%AA%E5%B1%8F2020-11-11%20%E4%B8%8B%E5%8D%8812.08.00.png)
+
+## 线程同步
+
+![截屏2020-11-16 下午4.24.38](images/%E6%88%AA%E5%B1%8F2020-11-16%20%E4%B8%8B%E5%8D%884.24.38.png)
+
+
+
+## 互斥量
+
+互斥量（mutex)从本质上说是一把锁，在访问共享资源前对互斥量进行加锁，在访问后释放互斥量。对互斥量加锁后，其他试图加锁的线程都会被阻塞直到当前线程释放。
+
+互斥变量：pthread_mutex_t
+
+![截屏2020-11-16 下午4.44.07](images/%E6%88%AA%E5%B1%8F2020-11-16%20%E4%B8%8B%E5%8D%884.44.07.png)
+
+可以使用pthread_mutex_trylock尝试对互斥量进行加锁，如果调用pthread_mutex_trylock时互斥量处于未锁住状态，那么pthread_mutex_trylock将锁住互斥量，失败则返回EBUSY，不会出现阻塞。
+
+## 避免产生死锁
+
+线程1占有互斥量1，想锁互斥量2，线程2占有互斥量2，想锁1.
+
+1. 可以通过仔细控制互斥量加锁的顺序来避免死锁的发生。
+2. 可以使用pthread_mutex_trylock避免死锁，如果返回成功，则继续前进，若失败，则可以释放已经占有的锁。
+
+
+
+Pthread_mutex_timedlock
+
+允许绑定线程阻塞时间，达到超过时间，返回错误码ETIMEDOUT
+
+
+
+## 读写锁
+
+读写锁与互斥量相似，但是允许更高的并行性。
+
+* 互斥量：要么是锁住状态，要么是不加锁状态，且一次只有一个线程可以对其加锁。
+* 读写锁：三种状态： 读模式加锁，写模式加锁，不加锁。一次只有一个线程可以占有写模式的读写锁，但是多个线程可以同时占有读模式的读写锁
+  * 写加锁状态时，所有线程都无法对其加锁
+  * 读加锁状态时，所有线程以读可加锁，以写不可加锁
+  * 读加锁状态时，一个线程试图写锁，此后阻塞读锁请求，避免读模式锁长期占有
+
+读写锁适合读>>写的情况，也称共享互斥锁。![截屏2020-11-16 下午5.27.59](images/%E6%88%AA%E5%B1%8F2020-11-16%20%E4%B8%8B%E5%8D%885.27.59.png)
+
+带有超时的读写锁：
+
+Pthread_rwlock_timedrdlock 和 pthread_rwlock_timedwrlock
+
+## 条件变量
+
+条件变量给多个线程提供了一个回合的场所。条件变量与互斥量一起使用时，允许线程以无竞争的方式等待特定的条件发生。
+
+线程在改变条件状态之前必须首先锁住互斥量。
+
+初始化和反初始化
+
+![截屏2020-11-16 下午7.37.13](images/%E6%88%AA%E5%B1%8F2020-11-16%20%E4%B8%8B%E5%8D%887.37.13.png)
+
+![截屏2020-11-16 下午7.39.22](images/%E6%88%AA%E5%B1%8F2020-11-16%20%E4%B8%8B%E5%8D%887.39.22.png)
+
+## 自旋锁
+
+自旋锁与互斥量类似，他不通过休眠使进程阻塞，而是在获取锁之前一直处于忙等阻塞状态。
+
+一种是没有获取到锁的线程就一直循环等待判断该资源是否已经释放锁，这种锁叫做`自旋锁`，它不用将线程阻塞起来(NON-BLOCKING)；还有一种处理方式就是把自己阻塞起来，等待重新调度请求，这种叫做`互斥锁`。
+
+适用于：锁被持有的时间短，并且线程并不希望在重新调度上花费太多的成本。
+
+## 屏障
+
+屏障是用户协调多个线程并行工作的同步机制。屏障允许每个线程等待，直到所有的合作线程都到达某一点，然后从该点继续执行。
+
+它允许任意数量的线程等待。![截屏2020-11-16 下午8.07.46](images/%E6%88%AA%E5%B1%8F2020-11-16%20%E4%B8%8B%E5%8D%888.07.46.png)
+
+![截屏2020-11-16 下午8.08.47](images/%E6%88%AA%E5%B1%8F2020-11-16%20%E4%B8%8B%E5%8D%888.08.47.png)
+
+![截屏2020-11-16 下午8.09.30](images/%E6%88%AA%E5%B1%8F2020-11-16%20%E4%B8%8B%E5%8D%888.09.30.png)
 
 
 
 # 14 高级IO
+
+## 14.2非阻塞I/O
+
+非阻塞I/O使我们可以发出open，read，和write这样的I/O操作，并使这些操作不会永远阻塞。如果这种操作不能完成，则调用立即出错返回。
+
+两种指定非阻塞I/O方法
+
+1. 若调用open获得描述符，则可指定O_NONBLOCK标志
+2. 对于一个已经打开的描述符，则可调用fcnt1，由该函数打开O_NONBLOCK标志。
+
+
+
+## 14.4 I/O多路转接
+
+![截屏2020-11-17 上午11.31.58](images/%E6%88%AA%E5%B1%8F2020-11-17%20%E4%B8%8A%E5%8D%8811.31.58.png)
+
+![截屏2020-11-17 上午11.33.10](images/%E6%88%AA%E5%B1%8F2020-11-17%20%E4%B8%8A%E5%8D%8811.33.10.png)
+
+另一种方法：使用一个进程执行，但使用非阻塞I/O读取数据。这种方法是浪费CPU时间，大多数时间实际上是无数据可读的，因此执行read系统调用浪费了时间。
+
+还有一种方法为异步I/O：当描述符准备好可以进行I/O时，用一个信号通知它，但这种信号对每个进程只有一个（SIGPOLL或SIGIO)，如果该信号对两个描述符都起作用，则无法判断哪个描述符准备好了。
+
+比较好的技术是I/O多路转接。构造一张我们感兴趣的描述符的列表，然后调用一个函数，直到这些描述符中的一个已准备好进行I/O时，该函数才返回。
+
+### select和pselect
+
+select可实现I/O多路转接，![截屏2020-11-17 下午12.09.15](images/%E6%88%AA%E5%B1%8F2020-11-17%20%E4%B8%8B%E5%8D%8812.09.15.png)
+
+传入：描述符，每个描述符我们所关心的条件，愿意等待的时间
+
+返回：已准备好的描述符的总数量，对于读、写、异常这三个条件中的每一个，哪些描述符已准备好
+
+Tvptr==NULL 永远等待
+
+Tvptr ->tr_sec==0 &&Tvptr ->tr_usec==0 不等待
+
+Tvptr ->tr_sec！=0 &&Tvptr ->tr_usec！=0 等待指定的秒数 ![截屏2020-11-17 下午4.52.29](images/%E6%88%AA%E5%B1%8F2020-11-17%20%E4%B8%8B%E5%8D%884.52.29.png)
 
 ## 14.8 存储映射I/O
 
@@ -761,6 +932,36 @@ then what happens depends on which direction of data flow we want
 
 
 ## 15.10 POSIX信号量
+
+## 总结
+
+## Summary of UNIX IPC so far
+
+- Shared memory
+  - Anonymous mmap between related process (i.e., parent and child)
+  - File-backed mmap or XSI shared memory between unrelated processes
+- Synchronization
+  1. Multiple threads in a single process
+     - pthread mutex, rw lock, condition variable
+  2. Multiple threads & processes sharing a memory region
+     - Unnamed POSIX semaphore
+     - pthread mutex, rw lock, condition variable with PTHREAD_PROCESS_SHARED attribute
+  3. Multiple processes with no shared memory
+     - Named POSIX semaphore
+- Pipe
+  - only between related processes
+  - half duplex (i.e., one way communication)
+- FIFO (aka named pipe)
+  - represented as a file, thus can be used between unrelated processes
+  - still half duplex
+- TCP socket
+  - connects any two processes including remote processes
+  - full duplex
+  - high protocol overhead
+  - reliable stream socket – reliable byte stream, but message boundaries are not preserved
+- UDP sockets
+  - lower protocol overhead than TCP
+  - unreliable datagram socket – message boundaries are preserved, but deliveries are unreliable
 
 POSIX信号量机制是3种IPC机制之一（消息队列，信号量，共享存储）
 
